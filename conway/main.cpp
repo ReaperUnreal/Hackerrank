@@ -430,28 +430,25 @@ Point choosePufferLocation(char player, char opponent, int pcount, int ocount, c
       //1 0
       //2 3
       //first placement
-      //select quadrant
-      int quadrant = 0;
+      //select top or bottom
+      bool top = false;
       if(ocount != 0)
       {
          //want to give myself some breathing room
          Point op = findSinglePlayerPoint(opponent, board);
          int oq = getPointQuadrant(op);
-         quadrant = getOppositeQuadrant(oq);
+         if((oq == 1) || (oq == 0))
+            top = false;
+         else
+            top = true;
       }
-      else
-         quadrant = 2;
 
       //get top left point
       Point p(0);
-      switch(quadrant)
-      {
-      case 0: p = Point(boardWidth - pufferWidth - 1, 1); break;
-      case 1: p = Point(1, 1); break;
-      case 2: p = Point(1, boardHeight - pufferHeight - 1); break;
-      case 3: p = Point(boardWidth - pufferWidth - 1, boardHeight - pufferHeight - 1); break;
-      default: break;
-      }
+      if(top)
+         p = Point((boardWidth / 2) - (pufferWidth / 2), (boardHeight / 2) - (pufferHeight / 2));
+      else
+         p = Point((boardWidth / 2) - (pufferWidth / 2), (boardHeight / 2) + (pufferHeight / 2));
       return p;
    }
    else
