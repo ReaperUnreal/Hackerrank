@@ -381,6 +381,8 @@ Point getAttackLocationNoFallback(char player, char *board)
 
    IndexScore topAttackLocation = attackLocations.top();
 
+   cerr << "Attack " << topAttackLocation.score << endl;
+
    return Point(topAttackLocation.index);
 }
 
@@ -449,6 +451,9 @@ Point choosePufferLocation(char player, char opponent, int pcount, int ocount, c
          p = Point((boardWidth / 2) - (pufferWidth / 2), (boardHeight / 2) - (pufferHeight / 2));
       else
          p = Point((boardWidth / 2) - (pufferWidth / 2), (boardHeight / 2) + (pufferHeight / 2));
+
+      cerr << "Init Puffer " << (top ? "Top" : "Bottom") << endl;
+
       return p;
    }
    else
@@ -492,6 +497,9 @@ Point choosePufferLocation(char player, char opponent, int pcount, int ocount, c
       //true top left = board top left - first puffer point
       //new point = true top left + new puffer point
       Point p(boardTL.x - firstPoint.x + pufferPoint.x, boardTL.y - firstPoint.y + pufferPoint.y);
+
+      cerr << "Puffer " << count << endl;
+
       return p;
    }
 }
