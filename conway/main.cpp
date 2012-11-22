@@ -500,7 +500,8 @@ Point choosePufferLocation(char player, char opponent, int pcount, int ocount, c
 
          //true top left = board top left - first puffer point
          //new point = true top left + new puffer point
-         Point p(boardTL.x - firstPoint.x + pufferPoint.x, boardTL.y - firstPoint.y + pufferPoint.y);
+         p.x = boardTL.x - firstPoint.x + pufferPoint.x;
+         p.y = boardTL.y - firstPoint.y + pufferPoint.y;
 
          //increment for next iteration, just in case
          pcount++;
