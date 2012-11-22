@@ -1,6 +1,8 @@
 #include <iostream>
-#include <time.h>
-#include <math.h>
+#include <ctime>
+#include <cmath>
+#include <cstdlib>
+#include <queue>
 using namespace std;
 
 #define BLACK 'b'
@@ -14,39 +16,39 @@ const int boardSize = boardWidth * boardHeight;
 
 const int MAX_TRIES = 512;
 
-const char pufferUp = [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
-                       1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
-                       0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1,
-                       0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1,
-                       0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0];
-const char pufferDown = [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                         0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1,
-                         0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1,
-                         1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
-                         0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1];
+const char pufferUp[90] = {0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+                           1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
+                           0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1,
+                           0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1,
+                           0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0};
+const char pufferDown[90] = {0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                             0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1,
+                             0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1,
+                             1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
+                             0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
 const int pufferWidth = 18;
 const int pufferHeight = 5;
 const int pufferCount = 22;
 
-const char glider1 = [0, 1, 0,
-                      0, 0, 1,
-                      1, 1, 1];
-const char glider2 = [0, 1, 0,
-                      1, 0, 0,
-                      1, 1, 1];
-const char glider3 = [1, 1, 1,
-                      0, 0, 1,
-                      0, 1, 0];
-const char glider4 = [1, 1, 1,
-                      1, 0, 0,
-                      0, 1, 0];
+const char glider1[9] = {0, 1, 0,
+                         0, 0, 1,
+                         1, 1, 1};
+const char glider2[9] = {0, 1, 0,
+                         1, 0, 0,
+                         1, 1, 1};
+const char glider3[9] = {1, 1, 1,
+                         0, 0, 1,
+                         0, 1, 0};
+const char glider4[9] = {1, 1, 1,
+                         1, 0, 0,
+                         0, 1, 0};
 const int gliderWidth = 3;
 const int gliderHeight = 3;
 const int gliderCount = 5;
 
-const char methusela = [0, 1, 0, 0, 0, 0, 0,
-                        0, 0, 0, 1, 0, 0, 0,
-                        1, 1, 0, 0, 1, 1, 1];
+const char methusela[21] = {0, 1, 0, 0, 0, 0, 0,
+                            0, 0, 0, 1, 0, 0, 0,
+                            1, 1, 0, 0, 1, 1, 1};
 const int methuselaWidth = 7;
 const int methuselaHeight = 3;
 const int methuselaCount = 7;
@@ -114,6 +116,26 @@ public:
    int y;
 };
 
+class IndexScore
+{
+public:
+   IndexScore(int i, int s) : index(i), score(s)
+   {
+   }
+
+   IndexScore() : index(0), score(0)
+   {
+   }
+
+   bool operator<(const IndexScore &is) const
+   {
+      return score < is.score;
+   }
+
+   int index;
+   int score;
+};
+
 ostream& operator<<(ostream &os, const Point &p)
 {
    os << p.x << " " << p.y << endl;
@@ -138,19 +160,6 @@ Point findRandomDead(char *board)
 int countPlayerNeighborhood(char player, char *board, Point p)
 {
    int count = 0;
-#if 0
-   if(p.y == 0)
-      return 100;
-
-   if(p.x == 0)
-      return 100;
-
-   if(p.y == (boardHeight - 1))
-      return 100;
-
-   if(p.x == (boardWidth - 1))
-      return 100;
-#endif
 
    Point t = p;
    
@@ -350,6 +359,31 @@ Point getAttackLocation(char player, char *board, int pcount)
    return getGoodSpreadPoint(player, board, pcount);
 }
 
+Point getAttackLocationNoFallback(char player, char *board)
+{
+   char opponent = getOpponent(player);
+   priority_queue<IndexScore> attackLocations;
+
+   //try every point on the map, and if that fails, just get a good point spread point
+   for(int i = 0; i < boardSize; i++)
+   {
+      Point pi(i);
+      if(pi.isDead(board))
+      {
+         int picount = countPlayerNeighborhood(player, board, pi);
+         if(picount < 3) // don't want to hurt ourselves by accident
+         {
+            int oicount = countPlayerNeighborhood(opponent, board, pi);
+            attackLocations.push(IndexScore(i, oicount));
+         }
+      }
+   }
+
+   IndexScore topAttackLocation = attackLocations.top();
+
+   return Point(topAttackLocation.index);
+}
+
 Point placeSpread(char player, char *board)
 {
    char opponent = getOpponent(player);
@@ -389,12 +423,8 @@ Point placeSpread(char player, char *board)
    }
 }
 
-Point choosePufferLocation(char player, char *board)
+Point choosePufferLocation(char player, char opponent, int pcount, int ocount, char *board)
 {
-   char opponent = getOpponent(player);
-   int pcount = countPlayer(player, board);
-   int ocount = countPlayer(opponent, board);
-
    if(pcount == 0)
    {
       //1 0
@@ -424,12 +454,64 @@ Point choosePufferLocation(char player, char *board)
       }
       return p;
    }
+   else
+   {
+      //find the index where we're at
+      int size = pufferWidth * pufferHeight;
+      int count = 0;
+      int index;
+      for(index = 0; index < size; index++)
+      {
+         if(pufferUp[index] == 1)
+         {
+            count++;
+            if(count > pcount)
+               break;
+         }
+      }
 
+      //find the first index
+      int first;
+      for(first = 0; first < size; first++)
+      {
+         if(pufferUp[first] == 1)
+            break;
+      }
+
+      //find the point which we're using as top-left
+      //it'll be the most top-left point that's our colour on the board
+      int boardIndex = 0;
+      for(boardIndex = 0; boardIndex < boardSize; boardIndex++)
+      {
+         if(board[boardIndex] == player)
+            break;
+      }
+
+      //calculate the new return point
+      Point boardTL(boardIndex);
+      Point firstPoint(first % pufferWidth, first / pufferWidth);
+      Point pufferPoint(index % pufferWidth, index / pufferWidth);
+
+      //true top left = board top left - first puffer point
+      //new point = true top left + new puffer point
+      Point p(boardTL.x - firstPoint.x + pufferPoint.x, boardTL.y - firstPoint.y + pufferPoint.y);
+      return p;
+   }
 }
 
-Point pufferGlifer(char player, char *board)
+Point pufferGlider(char player, char *board)
 {
-   return Point(0);
+   //get the base info that every step needs
+   char opponent = getOpponent(player);
+   int pcount = countPlayer(player, board);
+   int ocount = countPlayer(opponent, board);
+
+   Point p(0);
+   if(pcount < pufferCount)
+      p = choosePufferLocation(player, opponent, pcount, ocount, board);
+   else
+      p = getAttackLocationNoFallback(player, board);
+   return p;
 }
 
 void nextMove(char player, char *board)
@@ -440,7 +522,7 @@ void nextMove(char player, char *board)
 #if 0 // random spread strategy
    Point p = placeSpread(player, board);
 #endif
-#if 1 // puffer and 3 glider strategy
+#if 1 // puffer, methusela, and 2 glider strategy
    Point p = pufferGlider(player, board);
 #endif
 #if 1 //debug
