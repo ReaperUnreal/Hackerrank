@@ -458,49 +458,64 @@ Point choosePufferLocation(char player, char opponent, int pcount, int ocount, c
    }
    else
    {
-      //find the index where we're at
-      int size = pufferWidth * pufferHeight;
+      Point p(0);
       int count = 0;
-      int index;
-      for(index = 0; index < size; index++)
+      do
       {
-         if(pufferUp[index] == 1)
+         //find the index where we're at
+         int size = pufferWidth * pufferHeight;
+         count = 0;
+         int index;
+         for(index = 0; index < size; index++)
          {
-            count++;
-            if(count > pcount)
+            if(pufferUp[index] == 1)
+            {
+               count++;
+               if(count > pcount)
+                  break;
+            }
+         }
+
+         //find the first index
+         int first;
+         for(first = 0; first < size; first++)
+         {
+            if(pufferUp[first] == 1)
                break;
          }
-      }
 
-      //find the first index
-      int first;
-      for(first = 0; first < size; first++)
+         //find the point which we're using as top-left
+         //it'll be the most top-left point that's our colour on the board
+         int boardIndex = 0;
+         for(boardIndex = 0; boardIndex < boardSize; boardIndex++)
+         {
+            if(board[boardIndex] == player)
+               break;
+         }
+
+         //calculate the new return point
+         Point boardTL(boardIndex);
+         Point firstPoint(first % pufferWidth, first / pufferWidth);
+         Point pufferPoint(index % pufferWidth, index / pufferWidth);
+
+         //true top left = board top left - first puffer point
+         //new point = true top left + new puffer point
+         Point p(boardTL.x - firstPoint.x + pufferPoint.x, boardTL.y - firstPoint.y + pufferPoint.y);
+
+         //increment for next iteration, just in case
+         pcount++;
+      }
+      while(!p.isDead(board)); //make sure the point is dead
+
+      if(p.isDead(board))
       {
-         if(pufferUp[first] == 1)
-            break;
+         cerr << "Puffer " << count << endl;
+         return p;
       }
 
-      //find the point which we're using as top-left
-      //it'll be the most top-left point that's our colour on the board
-      int boardIndex = 0;
-      for(boardIndex = 0; boardIndex < boardSize; boardIndex++)
-      {
-         if(board[boardIndex] == player)
-            break;
-      }
-
-      //calculate the new return point
-      Point boardTL(boardIndex);
-      Point firstPoint(first % pufferWidth, first / pufferWidth);
-      Point pufferPoint(index % pufferWidth, index / pufferWidth);
-
-      //true top left = board top left - first puffer point
-      //new point = true top left + new puffer point
-      Point p(boardTL.x - firstPoint.x + pufferPoint.x, boardTL.y - firstPoint.y + pufferPoint.y);
-
-      cerr << "Puffer " << count << endl;
-
-      return p;
+      //fallback is to attack
+      cerr << "Fallback ";
+      return getAttackLocationNoFallback(player, board);
    }
 }
 
